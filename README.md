@@ -17,59 +17,34 @@ If you are developing a production application, we recommend updating the config
 
 ```js
 export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+  # Cutline Studio
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+  Cutline Studio is a local video editor prototype for shaping an authorized clip into a vertical MP4. It includes the workspace-root `index.mp4` as its sample source.
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+  ## Run locally
 
-```
+  Requirements: Node.js 20.19+ or 22.13+, npm, and FFmpeg with `ffprobe` available on `PATH`.
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+  ```sh
+  npm install
+  npm run dev
+  ```
 
-```js
+  Open the Vite URL printed in the terminal. The app runs the React interface on port 5173 and the local video service on port 8787.
+
+  ## Current workflow
+
+  - Load `index.mp4` or upload an MP4, MOV, WebM, or MKV file (up to 1 GB).
+  - Select a time range and a Reaction, Story, or Chaos color treatment.
+  - Add optional opening and lower caption text.
+  - Render a 1080 x 1920 MP4 with a blurred background, centered source frame, color grade, and text overlays.
+  - Preview and download the result; optionally save local posting notes.
+
+  Original uploads, renders, and share drafts are stored under `.clipper-data/`, which is ignored by Git. The app does not upload video or credentials to a third-party service.
+
+  ## Publishing and model limits
+
+  This version does not automatically publish or predict virality. TikTok's [Direct Post developer guidelines](https://developers.tiktok.com/doc/content-sharing-guidelines) reject private one-account upload utilities and require an audited, creator-facing integration with explicit creator consent and account controls. For this local project, use the MP4 export and complete any posting manually only when your rights and assignment rules allow it.
+
+  The Reaction, Story, and Chaos options are deterministic edit presets, not AI-generated edits. Captions are user-entered text, and the app does not yet rank candidate moments or learn from teacher ratings.
 // eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-
-```

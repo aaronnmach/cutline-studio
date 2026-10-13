@@ -37,8 +37,11 @@ const upload = multer({
   storage,
   limits: { fileSize: 1024 * 1024 * 1024 },
   fileFilter: (_request, file, callback) => {
-    const validType = ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska'].includes(file.mimetype)
-    callback(validType ? null : new Error('Use an MP4, MOV, WebM, or MKV video.'), validType)
+    const validTypes = ['video/mp4', 'video/quicktime', 'video/webm', 'video/x-matroska']
+    const validExtensions = ['.mp4', '.mov', '.webm', '.mkv']
+    const validVideo = validTypes.includes(file.mimetype) || validExtensions.includes(path.extname(file.originalname).toLowerCase())
+    const error = validVideo ? null : Object.assign(new Error('Use an MP4, MOV, WebM, or MKV video.'), { status: 415 })
+    callback(error, validVideo)
   },
 })
 
@@ -230,7 +233,7 @@ app.post('/api/render', upload.single('video'), async (request, response, next) 
 
 app.post('/api/share-drafts', async (request, response) => {
   const { clipId, title, rightsConfirmed } = request.body || {}
-  if (!rightsConfirmed) return response.status(400).json({ error: 'Confirm that you have permission to edit and post this footage.' })
+  if (!rightsConfirmed) return response.status(400).json({ error: 'Confirm that you have permission to use this footage before saving notes.' })
   if (typeof clipId !== 'string' || !/^[a-f0-9-]+$/.test(clipId)) {
     return response.status(400).json({ error: 'Render a clip before saving a publish draft.' })
   }
@@ -255,7 +258,7 @@ app.post('/api/share-drafts', async (request, response) => {
 
 app.use((error, _request, response, _next) => {
   console.error(error)
-  const status = error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE' ? 413 : 500
+  const status = error.status || (error instanceof multer.MulterError && error.code === 'LIMIT_FILE_SIZE' ? 413 : 500)
   response.status(status).json({ error: status === 500 ? error.message || 'The local video service failed.' : 'Video exceeds the 1 GB upload limit.' })
 })
 
